@@ -11,7 +11,7 @@ const logger = winston.createLogger({
 });
 
 io.on('connection', (client) => {
-  logger.info(`user ${client.id} connected`);npm 
+  logger.info(`user ${client.id} connected`);
   
   client.on('join', (room) => {
     client.join(room);

@@ -26,6 +26,6 @@ server.listen(Port, () => {
   });
 });
   
-app.use((req, res, next) => {
-  res.sendStatus(404);
+app.use((req, res) => {
+  res.send('sorry, no api calls here');
 });
