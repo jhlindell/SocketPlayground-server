@@ -1,7 +1,11 @@
 {
   "name": "socket-playground-server",
   "version": "1.0.0",
-  "description": "",
+  "description": "server for socket example",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jhlindell/SocketPlayground-server"
+  },
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
