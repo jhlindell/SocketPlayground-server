@@ -9,6 +9,17 @@ const Users = (foo = () =>{
     users.delete(id);
   }
 
+  function changeRoom(id, room){
+    const user = users.get(id);
+    if(user){
+      user.room = room;
+      users.set(id, user);
+    } else {
+      console.log('error')
+    }
+    return user;
+  }
+
   function getUserList(){
     const userList = Array.from(users.values());
     return userList;
@@ -19,9 +30,16 @@ const Users = (foo = () =>{
     return user.name;
   }
 
+  function getUser(id){
+    const user = users.get(id);
+    return user;
+  }
+
   return {
     addUser,
     removeUser,
+    changeRoom,
+    getUser,
     getUserList,
     getUsernameById
   }

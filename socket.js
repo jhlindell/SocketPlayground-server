@@ -2,7 +2,6 @@ const io = require('socket.io')();
 const winston = require('winston');
 const winConfig = require('./config/winston.config');
 const chatUsers = require('./users');
-const chatRoom = require('./chatRoom');
 
 const logger = winston.createLogger({
   transports: [
@@ -18,18 +17,12 @@ io.on('connection', (client) => {
     client.emit('userList', userList);
   }
 
-  sendMessagesToAll = () => {
-    const messages = chatRoom.getMessages();
-    client.broadcast.emit('chatMessages', messages);
-    client.emit('chatMessages', messages);
-  }
-
-  // logger.info(`user ${client.id} connected`);
   sendUserListToAll();
-  sendMessagesToAll();
 
   client.on('login', (user) => {
-    chatUsers.addUser(client.id, user, 0);
+    //set user starting room to zero
+    user.room = 0;
+    chatUsers.addUser(client.id, user);
     sendUserListToAll();
   });
 
@@ -37,23 +30,20 @@ io.on('connection', (client) => {
     chatUsers.removeUser(client.id);
     sendUserListToAll();
   });
+
+  client.on('changeRoom', (roomNumber) => {
+    let user = chatUsers.getUser(client.id);
+    client.leave(user.room);
+    user = chatUsers.changeRoom(client.id, roomNumber);
+    client.join(roomNumber);
+    client.emit('roomChanged', user);
+    sendUserListToAll();
+  });
   
-  client.on('join', (room) => {
-    client.join(room);
-    // logger.info(`client ${client.id} joined room ${room}`);
-    client.emit('joined', `joined room ${room}`);
-  });
-
-  client.on('leave', (room) => {
-    client.leave(room);
-    // logger.info(`client ${client.id} left room ${room}`);
-    client.emit('left room', `left room ${room}`);
-  });
-
   client.on('message', (message) => {
-    const username = chatUsers.getUsernameById(client.id);
-    chatRoom.addMessage(username, message);
-    sendMessagesToAll();
+    let user = chatUsers.getUser(client.id);
+    const timeStamp = new Date().toString();
+    io.in(user.room).emit('newMessage', { username: user.name, message, timeStamp});
   });
 
   client.on('disconnect', () => {
