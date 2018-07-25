@@ -21,8 +21,12 @@ io.on('connection', (client) => {
 
   client.on('login', (user) => {
     //set user starting room to zero
-    user.room = 0;
-    chatUsers.addUser(client.id, user);
+    if(user){
+      user.room = 0;
+      chatUsers.addUser(client.id, user);
+    } else {
+      logger.error('no user for login', user);
+    }
     sendUserListToAll();
   });
 
@@ -46,8 +50,13 @@ io.on('connection', (client) => {
     io.in(user.room).emit('newMessage', { username: user.name, message, timeStamp});
   });
 
+  client.on('spam', ()=> {
+    let user = chatUsers.getUser(client.id);
+    const timeStamp = new Date().toString();
+    io.of('/').emit('newMessage', { username: user.name, message: 'I need Attention. LOOK AT ME!!!', timeStamp});
+  })
+
   client.on('disconnect', () => {
-    logger.info(`client disconnect... ${client.id}`);
     chatUsers.removeUser(client.id);
     sendUserListToAll();
   });

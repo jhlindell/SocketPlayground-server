@@ -30,6 +30,14 @@ const Users = (foo = () =>{
     return user.name;
   }
 
+  function getIdByUsername(username){
+    users.forEach((value, key) => {
+      if(username === value.name){
+        return key;
+      }
+    });
+  }
+
   function getUser(id){
     const user = users.get(id);
     return user;
@@ -41,7 +49,8 @@ const Users = (foo = () =>{
     changeRoom,
     getUser,
     getUserList,
-    getUsernameById
+    getUsernameById,
+    getIdByUsername
   }
 })();
 
