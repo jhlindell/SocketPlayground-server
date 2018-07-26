@@ -13,6 +13,8 @@ const logger = winston.createLogger({
 });
 const Port = process.env.PORT || 8000;
 
+app.use(cors());
+
 io.attach(server, {
 	pingInterval: 10000,
 	pingTimeout: 5000,
@@ -20,10 +22,7 @@ io.attach(server, {
 });
 
 server.listen(Port, () => {
-  logger.log({
-    level:'debug',
-    message: `Now listening on port ${Port}`,
-  });
+  logger.info(`Now listening on port ${Port}`);
 });
   
 app.use((req, res) => {

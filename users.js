@@ -1,3 +1,13 @@
+const winConfig = require('./config/winston.config');
+const winston = require('winston');
+
+const logger = winston.createLogger({
+  transports: [
+    new winston.transports.Console(winConfig.console),
+    // new winston.transports.File(winConfig.file),
+  ],
+});
+
 const Users = (foo = () =>{
   const users = new Map();
 
@@ -15,7 +25,7 @@ const Users = (foo = () =>{
       user.room = room;
       users.set(id, user);
     } else {
-      console.log('error')
+      logger.error('bad id passed to change room');
     }
     return user;
   }
@@ -31,11 +41,13 @@ const Users = (foo = () =>{
   }
 
   function getIdByUsername(username){
+    let userId = null;
     users.forEach((value, key) => {
       if(username === value.name){
-        return key;
+        userId= key;
       }
     });
+    return userId;
   }
 
   function getUser(id){

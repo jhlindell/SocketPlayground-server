@@ -16,7 +16,6 @@ io.on('connection', (client) => {
     client.broadcast.emit('userList', userList);
     client.emit('userList', userList);
   }
-
   sendUserListToAll();
 
   client.on('login', (user) => {
@@ -47,13 +46,24 @@ io.on('connection', (client) => {
   client.on('message', (message) => {
     let user = chatUsers.getUser(client.id);
     const timeStamp = new Date().toString();
-    io.in(user.room).emit('newMessage', { username: user.name, message, timeStamp});
+    io.in(user.room).emit('newMessage', { username: user.name, message, timeStamp });
+  });
+
+  client.on('privateMessage', (obj) => {
+    let userId = chatUsers.getIdByUsername(obj.username);
+    if(userId){
+      const privateMessage = 'Private: ' + obj.message;
+      const timeStamp = new Date().toString();
+      client.to(userId).emit('newMessage', { username: obj.username, message: privateMessage, timeStamp })
+    } else {
+      logger.error('bad username given for private message', obj);
+    }
   });
 
   client.on('spam', ()=> {
     let user = chatUsers.getUser(client.id);
     const timeStamp = new Date().toString();
-    io.of('/').emit('newMessage', { username: user.name, message: 'I need Attention. LOOK AT ME!!!', timeStamp});
+    io.of('/').emit('newMessage', { username: user.name, message: 'I NEED ATTENTION. LOOK AT ME!!!', timeStamp});
   })
 
   client.on('disconnect', () => {
