@@ -2,7 +2,6 @@ const io = require('socket.io')();
 const winston = require('winston');
 const winConfig = require('./config/winston.config');
 const chatUsers = require('./users');
-const chatRoom = require('./chatRoom');
 
 const logger = winston.createLogger({
   transports: [
@@ -17,19 +16,16 @@ io.on('connection', (client) => {
     client.broadcast.emit('userList', userList);
     client.emit('userList', userList);
   }
-
-  sendMessagesToAll = () => {
-    const messages = chatRoom.getMessages();
-    client.broadcast.emit('chatMessages', messages);
-    client.emit('chatMessages', messages);
-  }
-
-  // logger.info(`user ${client.id} connected`);
   sendUserListToAll();
-  sendMessagesToAll();
 
   client.on('login', (user) => {
-    chatUsers.addUser(client.id, user, 0);
+    //set user starting room to zero
+    if(user){
+      user.room = 0;
+      chatUsers.addUser(client.id, user);
+    } else {
+      logger.error('no user for login', user);
+    }
     sendUserListToAll();
   });
 
@@ -37,27 +33,40 @@ io.on('connection', (client) => {
     chatUsers.removeUser(client.id);
     sendUserListToAll();
   });
+
+  client.on('changeRoom', (roomNumber) => {
+    let user = chatUsers.getUser(client.id);
+    client.leave(user.room);
+    user = chatUsers.changeRoom(client.id, roomNumber);
+    client.join(roomNumber);
+    client.emit('roomChanged', user);
+    sendUserListToAll();
+  });
   
-  client.on('join', (room) => {
-    client.join(room);
-    // logger.info(`client ${client.id} joined room ${room}`);
-    client.emit('joined', `joined room ${room}`);
-  });
-
-  client.on('leave', (room) => {
-    client.leave(room);
-    // logger.info(`client ${client.id} left room ${room}`);
-    client.emit('left room', `left room ${room}`);
-  });
-
   client.on('message', (message) => {
-    const username = chatUsers.getUsernameById(client.id);
-    chatRoom.addMessage(username, message);
-    sendMessagesToAll();
+    let user = chatUsers.getUser(client.id);
+    const timeStamp = new Date().toString();
+    io.in(user.room).emit('newMessage', { username: user.name, message, timeStamp });
   });
+
+  client.on('privateMessage', (obj) => {
+    let userId = chatUsers.getIdByUsername(obj.username);
+    if(userId){
+      const privateMessage = 'Private: ' + obj.message;
+      const timeStamp = new Date().toString();
+      client.to(userId).emit('newMessage', { username: obj.username, message: privateMessage, timeStamp })
+    } else {
+      logger.error('bad username given for private message', obj);
+    }
+  });
+
+  client.on('spam', ()=> {
+    let user = chatUsers.getUser(client.id);
+    const timeStamp = new Date().toString();
+    io.of('/').emit('newMessage', { username: user.name, message: 'I NEED ATTENTION. LOOK AT ME!!!', timeStamp});
+  })
 
   client.on('disconnect', () => {
-    logger.info(`client disconnect... ${client.id}`);
     chatUsers.removeUser(client.id);
     sendUserListToAll();
   });
