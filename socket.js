@@ -51,10 +51,11 @@ io.on('connection', (client) => {
 
   client.on('privateMessage', (obj) => {
     let userId = chatUsers.getIdByUsername(obj.username);
+    let senderName = chatUsers.getUsernameById(client.id);
     if(userId){
       const privateMessage = 'Private: ' + obj.message;
       const timeStamp = new Date().toString();
-      client.to(userId).emit('newMessage', { username: obj.username, message: privateMessage, timeStamp })
+      client.to(userId).emit('newMessage', { username: senderName, message: privateMessage, timeStamp })
     } else {
       logger.error('bad username given for private message', obj);
     }
