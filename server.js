@@ -7,8 +7,7 @@ const winConfig = require('./config/winston.config');
 
 const logger = winston.createLogger({
   transports: [
-    new winston.transports.Console(winConfig.console),
-    // new winston.transports.File(winConfig.file),
+    new winston.transports.Console(winConfig.console)
   ],
 });
 const Port = process.env.PORT || 8000;

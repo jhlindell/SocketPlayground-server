@@ -5,8 +5,7 @@ const chatUsers = require('./users');
 
 const logger = winston.createLogger({
   transports: [
-    new winston.transports.Console(winConfig.console),
-    // new winston.transports.File(winConfig.file),
+    new winston.transports.Console(winConfig.console)
   ],
 });
 
