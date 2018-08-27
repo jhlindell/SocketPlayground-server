@@ -44,8 +44,10 @@ io.on('connection', (socket) => {
   
   socket.on('message', (message) => {
     let user = chatUsers.getUser(socket.id);
-    const timeStamp = new Date().toString();
-    io.in(user.room).emit('newMessage', { username: user.name, message, timeStamp });
+    if(user){
+      const timeStamp = new Date().toString();
+      io.in(user.room).emit('newMessage', { username: user.name, message, timeStamp });
+    }
   });
 
   socket.on('privateMessage', (obj) => {
