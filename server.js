@@ -12,7 +12,7 @@ const logger = winston.createLogger({
 });
 const Port = process.env.PORT || 8000;
 
-app.use(cors());
+app.use(cors('https://socketio-chatdemo.herokuapp.com/'));
 
 io.attach(server, {
 	pingInterval: 10000,
