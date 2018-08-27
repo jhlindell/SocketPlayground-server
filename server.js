@@ -1,3 +1,6 @@
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
 const app = require('express')();
 const server = require('http').Server(app);
 const io = require('./socket');
@@ -12,7 +15,7 @@ const logger = winston.createLogger({
 });
 const Port = process.env.PORT || 8000;
 
-app.use(cors('https://socketio-chatdemo.herokuapp.com/'));
+app.use(cors(process.env.IOURL));
 
 io.attach(server, {
 	pingInterval: 10000,
